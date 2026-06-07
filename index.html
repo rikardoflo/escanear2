@@ -174,7 +174,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 </div>
 <script>
-const CLAUDE_API_KEY = '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 ';
+const CLAUDE_API_KEY = 'REEMPLAZA_CON_TU_API_KEY';
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyiV2cqvcbKCDM-TFXF58f5pktXcs6KFRUAFE3Sm93VcYZ4IMcJ48O_FmIyAeESxX4/exec';
 
 let cardB64 = null, personB64 = null;
@@ -311,7 +311,7 @@ async function analyzeCard() {
   } catch (err) {
     hideLoading();
     document.getElementById('captureSection').style.display = 'block';
-    showStatus('Sin conexión o error: datos no extraídos. Puedes llenar manualmente y guardar sin conexión.', 'warn');
+    showStatus('ERROR DETALLADO: ' + err.name + ' — ' + err.message, 'error');
     document.getElementById('fieldsCard').style.display = 'block';
   }
 }
