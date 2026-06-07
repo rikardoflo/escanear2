@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Medicon — Escáner de Tarjetas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f4f6f9;--surface:#fff;--navy:#0a2540;--accent:#1a6bcc;
+  --text:#0a2540;--muted:#6b7a8d;--border:#dde3ec;
+  --success-bg:#e6f4ea;--success:#1a7a3c;
+  --error-bg:#fce8e8;--error:#b91c1c;
+  --info-bg:#e8f1fb;--info:#1a6bcc;
+  --radius:12px;--radius-sm:8px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.app{max-width:440px;margin:0 auto;padding:1.25rem 1rem 3rem;}
+.header{text-align:center;padding:1.5rem 0 1.25rem;}
+.logo{font-family:'DM Serif Display',serif;font-size:22px;color:var(--navy);letter-spacing:-0.5px;}
+.logo span{color:var(--accent);}
+.subtitle{font-size:13px;color:var(--muted);margin-top:4px;}
+.evento-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:1rem;margin-bottom:1rem;}
+.evento-card label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;}
+.evento-card input{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);transition:border-color .15s;}
+.evento-card input:focus{outline:none;border-color:var(--accent);background:#fff;}
+.capture-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;}
+.capture-zone{background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius);padding:1rem;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;position:relative;overflow:hidden;min-height:110px;justify-content:center;transition:border-color .15s;}
+.capture-zone:hover{border-color:var(--accent);}
+.capture-zone.filled{border-style:solid;border-color:var(--accent);padding:0;}
+.capture-zone img{width:100%;height:110px;object-fit:cover;border-radius:var(--radius);display:block;}
+.capture-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.cap-icon{font-size:22px;color:var(--muted);}
+.cap-label{font-size:12px;color:var(--muted);text-align:center;line-height:1.3;}
+.cap-badge{position:absolute;top:6px;right:6px;background:var(--accent);color:#fff;border-radius:20px;font-size:10px;padding:2px 8px;font-weight:500;}
+.btn{width:100%;padding:12px;border-radius:var(--radius-sm);border:none;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s,transform .1s;}
+.btn:active{transform:scale(0.98);}
+.btn-primary{background:var(--navy);color:#fff;margin-bottom:.75rem;}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+.btn-primary:not(:disabled):hover{opacity:.88;}
+.btn-accent{background:var(--accent);color:#fff;}
+.btn-accent:disabled{opacity:.35;cursor:not-allowed;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);margin-top:.5rem;}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+.loading{text-align:center;padding:2.5rem 1rem;display:none;}
+.spinner{width:28px;height:28px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading p{font-size:14px;color:var(--muted);}
+.fields-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:1rem;margin-bottom:1rem;display:none;}
+.fields-title{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.field{margin-bottom:10px;}
+.field label{font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;}
+.field input,.field textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);transition:border-color .15s;}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:#fff;}
+.field textarea{resize:vertical;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.status{border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;display:none;align-items:center;gap:8px;margin-bottom:.75rem;}
+.status.success{background:var(--success-bg);color:var(--success);}
+.status.error{background:var(--error-bg);color:var(--error);}
+.status.info{background:var(--info-bg);color:var(--info);}
+.status a{color:inherit;font-weight:500;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">Medi<span>con</span></div>
+    <div class="subtitle">Escáner de tarjetas de presentación</div>
+  </div>
+
+  <div class="evento-card">
+    <label><i class="ti ti-calendar-event" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>Evento / Congreso</label>
+    <input type="text" id="evento" placeholder="Ej. Congreso Nacional de Cardiología 2026" />
+  </div>
+
+  <div id="captureSection">
+    <div class="capture-grid">
+      <div class="capture-zone" id="cardZone">
+        <i class="ti ti-credit-card cap-icon"></i>
+        <span class="cap-label">Foto de<br>la tarjeta</span>
+        <input type="file" accept="image/*" capture="environment" onchange="handleCard(event)">
+      </div>
+      <div class="capture-zone" id="personZone">
+        <i class="ti ti-user cap-icon"></i>
+        <span class="cap-label">Foto de<br>la persona</span>
+        <input type="file" accept="image/*" capture="user" onchange="handlePerson(event)">
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btnAnalyze" onclick="analyzeCard()" disabled>
+      <i class="ti ti-sparkles"></i> Extraer información con IA
+    </button>
+  </div>
+
+  <div class="loading" id="loadingSection">
+    <div class="spinner"></div>
+    <p id="loadingText">Analizando tarjeta...</p>
+  </div>
+
+  <div id="statusBar" class="status"></div>
+
+  <div class="fields-card" id="fieldsCard">
+    <div class="fields-title"><i class="ti ti-edit" style="font-size:14px"></i> Verifica y completa</div>
+    <div class="field"><label>Nombre completo</label><input type="text" id="f_nombre" placeholder="Dr. Nombre Apellido"></div>
+    <div class="two-col">
+      <div class="field"><label>Cargo</label><input type="text" id="f_cargo" placeholder="Especialista"></div>
+      <div class="field"><label>Especialidad</label><input type="text" id="f_especialidad" placeholder="Cardiología"></div>
+    </div>
+    <div class="field"><label>Institución / Empresa</label><input type="text" id="f_institucion" placeholder="Hospital o clínica"></div>
+    <div class="two-col">
+      <div class="field"><label>Teléfono</label><input type="tel" id="f_telefono" placeholder="+52 33..."></div>
+      <div class="field"><label>Celular</label><input type="tel" id="f_celular" placeholder="+52 33..."></div>
+    </div>
+    <div class="field"><label>Email</label><input type="email" id="f_email" placeholder="correo@hospital.com"></div>
+    <div class="field"><label>Sitio web</label><input type="text" id="f_web" placeholder="www.hospital.com"></div>
+    <div class="field"><label>Dirección</label><textarea id="f_direccion" rows="2" placeholder="Dirección completa"></textarea></div>
+    <div class="field"><label>LinkedIn / Redes</label><input type="text" id="f_redes" placeholder="linkedin.com/in/..."></div>
+    <div class="field"><label>Notas</label><textarea id="f_notas" rows="2" placeholder="Contexto, temas de interés..."></textarea></div>
+    <button class="btn btn-accent" id="btnSave" onclick="saveContact()">
+      <i class="ti ti-cloud-upload"></i> Guardar contacto
+    </button>
+    <button class="btn btn-ghost" onclick="resetApp()">
+      <i class="ti ti-refresh"></i> Escanear otra tarjeta
+    </button>
+  </div>
+</div>
+
+<script>
+// ── CONFIGURACIÓN ──────────────────────────────────────────
+const CLAUDE_API_KEY = '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;
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyiV2cqvcbKCDM-TFXF58f5pktXcs6KFRUAFE3Sm93VcYZ4IMcJ48O_FmIyAeESxX4/exec';
+// ──────────────────────────────────────────────────────────
+
+let cardB64 = null, personB64 = null;
+
+function compressImage(file, maxPx, quality) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onerror = rej;
+    r.onload = ev => {
+      const img = new Image();
+      img.onerror = rej;
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        if (w > maxPx || h > maxPx) {
+          if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else       { w = Math.round(w * maxPx / h); h = maxPx; }
+        }
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        res(c.toDataURL('image/jpeg', quality).split(',')[1]);
+      };
+      img.src = ev.target.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+
+function showPreview(zoneId, file, onchange) {
+  const zone = document.getElementById(zoneId);
+  const url = URL.createObjectURL(file);
+  zone.classList.add('filled');
+  zone.innerHTML = '<img src="' + url + '" alt="preview"><span class="cap-badge"><i class="ti ti-check"></i></span><input type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;" onchange="' + onchange + '">';
+}
+
+async function handleCard(e) {
+  const f = e.target.files[0]; if (!f) return;
+  cardB64 = await compressImage(f, 900, 0.72);
+  showPreview('cardZone', f, 'handleCard(event)');
+  checkReady();
+}
+
+async function handlePerson(e) {
+  const f = e.target.files[0]; if (!f) return;
+  personB64 = await compressImage(f, 400, 0.65);
+  showPreview('personZone', f, 'handlePerson(event)');
+  checkReady();
+}
+
+function checkReady() {
+  document.getElementById('btnAnalyze').disabled = !(cardB64 && personB64);
+}
+
+function showLoading(txt) {
+  document.getElementById('captureSection').style.display = 'none';
+  document.getElementById('fieldsCard').style.display = 'none';
+  document.getElementById('loadingSection').style.display = 'block';
+  document.getElementById('loadingText').textContent = txt;
+}
+
+function hideLoading() {
+  document.getElementById('loadingSection').style.display = 'none';
+}
+
+function showStatus(msg, type) {
+  const s = document.getElementById('statusBar');
+  s.className = 'status ' + type;
+  s.innerHTML = '<i class="ti ti-' + (type === 'success' ? 'circle-check' : type === 'error' ? 'alert-circle' : 'info-circle') + '"></i><span>' + msg + '</span>';
+  s.style.display = 'flex';
+}
+
+function fillFields(d) {
+  const m = {
+    nombre:'f_nombre', cargo:'f_cargo', especialidad:'f_especialidad',
+    institucion:'f_institucion', telefono:'f_telefono', celular:'f_celular',
+    email:'f_email', web:'f_web', direccion:'f_direccion', redes:'f_redes'
+  };
+  Object.entries(m).forEach(([k, id]) => {
+    const el = document.getElementById(id);
+    if (el && d[k]) el.value = d[k];
+  });
+}
+
+async function analyzeCard() {
+  if (!document.getElementById('evento').value.trim()) {
+    showStatus('Indica el nombre del evento antes de continuar.', 'error');
+    document.getElementById('statusBar').style.display = 'flex';
+    return;
+  }
+  showLoading('Analizando tarjeta con IA...');
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': CLAUDE_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 800,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: cardB64 } },
+            { type: 'text', text: 'Extrae la información de esta tarjeta de presentación. Responde ÚNICAMENTE con JSON válido sin backticks ni texto extra. Claves requeridas (usa "" si no encuentras el dato): nombre, cargo, especialidad, institucion, telefono, celular, email, web, direccion, redes' }
+          ]
+        }]
+      })
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    const raw = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    hideLoading();
+    fillFields(parsed);
+    document.getElementById('fieldsCard').style.display = 'block';
+    showStatus('Información extraída. Revisa y corrige antes de guardar.', 'info');
+  } catch (err) {
+    hideLoading();
+    document.getElementById('captureSection').style.display = 'block';
+    showStatus('Error al analizar: ' + err.message, 'error');
+  }
+}
+
+async function saveContact() {
+  const btn = document.getElementById('btnSave');
+  btn.disabled = true;
+  showLoading('Guardando en Google Sheets y Drive...');
+
+  const payload = {
+    action: 'save',
+    evento:       document.getElementById('evento').value,
+    nombre:       document.getElementById('f_nombre').value,
+    cargo:        document.getElementById('f_cargo').value,
+    especialidad: document.getElementById('f_especialidad').value,
+    institucion:  document.getElementById('f_institucion').value,
+    telefono:     document.getElementById('f_telefono').value,
+    celular:      document.getElementById('f_celular').value,
+    email:        document.getElementById('f_email').value,
+    web:          document.getElementById('f_web').value,
+    direccion:    document.getElementById('f_direccion').value,
+    redes:        document.getElementById('f_redes').value,
+    notas:        document.getElementById('f_notas').value,
+    fotoPersonaBase64: personB64, fotoPersonaMime: 'image/jpeg',
+    tarjetaBase64: cardB64,       tarjetaMime: 'image/jpeg'
+  };
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    const result = await res.json();
+    hideLoading();
+    btn.disabled = false;
+    document.getElementById('fieldsCard').style.display = 'block';
+    if (result.success) {
+      showStatus('Contacto guardado. ' + (result.sheetUrl ? '<a href="' + result.sheetUrl + '" target="_blank">Ver en Sheets →</a>' : ''), 'success');
+    } else {
+      showStatus('Error al guardar: ' + (result.error || 'desconocido'), 'error');
+    }
+  } catch (err) {
+    hideLoading();
+    btn.disabled = false;
+    document.getElementById('fieldsCard').style.display = 'block';
+    showStatus('Error de conexión con GAS: ' + err.message, 'error');
+  }
+}
+
+function resetApp() {
+  cardB64 = null; personB64 = null;
+  document.getElementById('captureSection').style.display = 'block';
+  document.getElementById('fieldsCard').style.display = 'none';
+  document.getElementById('statusBar').style.display = 'none';
+  const cz = document.getElementById('cardZone');
+  cz.classList.remove('filled');
+  cz.innerHTML = '<i class="ti ti-credit-card cap-icon"></i><span class="cap-label">Foto de<br>la tarjeta</span><input type="file" accept="image/*" capture="environment" onchange="handleCard(event)">';
+  const pz = document.getElementById('personZone');
+  pz.classList.remove('filled');
+  pz.innerHTML = '<i class="ti ti-user cap-icon"></i><span class="cap-label">Foto de<br>la persona</span><input type="file" accept="image/*" capture="user" onchange="handlePerson(event)">';
+  document.getElementById('btnAnalyze').disabled = true;
+  ['f_nombre','f_cargo','f_especialidad','f_institucion','f_telefono','f_celular',
+   'f_email','f_web','f_direccion','f_redes','f_notas'].forEach(id => document.getElementById(id).value = '');
+}
+</script>
+</body>
+</html>
