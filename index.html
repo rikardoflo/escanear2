@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>HospavIA — Registro de Contactos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f4f6f9;--surface:#fff;--navy:#1a3a6b;--accent:#00b4a6;
+  --text:#0a2540;--muted:#6b7a8d;--border:#dde3ec;
+  --success-bg:#e6f4ea;--success:#1a7a3c;
+  --error-bg:#fce8e8;--error:#b91c1c;
+  --info-bg:#e8f1fb;--info:#1a6bcc;
+  --warn-bg:#fff8e1;--warn:#b45309;
+  --radius:12px;--radius-sm:8px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.app{max-width:440px;margin:0 auto;padding:1.25rem 1rem 3rem;}
+.header{text-align:center;padding:1.2rem 0 1rem;}
+.logo{font-family:'DM Serif Display',serif;font-size:24px;color:var(--navy);}
+.logo span{color:var(--accent);}
+.subtitle{font-size:13px;color:var(--muted);margin-top:3px;}
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:1rem;margin-bottom:.875rem;}
+.card label.field-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;}
+.card input[type=text]{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);}
+.card input[type=text]:focus{outline:none;border-color:var(--accent);background:#fff;}
+.capture-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.875rem;}
+.capture-col{display:flex;flex-direction:column;gap:6px;}
+.preview-box{background:var(--surface);border:1.5px dashed var(--border);border-radius:var(--radius);min-height:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden;}
+.preview-box.done{border-style:solid;border-color:var(--accent);}
+.preview-box img{width:100%;height:100px;object-fit:cover;display:block;}
+.preview-box .cap-icon{font-size:22px;color:var(--muted);}
+.preview-box .cap-label{font-size:12px;color:var(--muted);text-align:center;}
+/* FILE BUTTONS — same pattern as test.html */
+input[type=file]{position:absolute;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;}
+label.file-btn{display:flex;align-items:center;justify-content:center;gap:5px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px;font-size:12px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;width:100%;}
+label.file-btn:active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.btn{width:100%;padding:13px;border-radius:var(--radius-sm);border:none;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:.5rem;}
+.btn-primary{background:var(--navy);color:#fff;}
+.btn-primary:disabled{opacity:.3;cursor:not-allowed;}
+.btn-accent{background:var(--accent);color:#fff;}
+.btn-accent:disabled{opacity:.3;cursor:not-allowed;}
+.btn-warn{background:var(--warn-bg);color:var(--warn);border:1px solid #f6d860;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.loading{text-align:center;padding:2.5rem 1rem;display:none;}
+.spinner{width:28px;height:28px;border:2.5px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading p{font-size:14px;color:var(--muted);}
+.fields-card{display:none;}
+.field{margin-bottom:10px;}
+.field label{font-size:11px;color:var(--muted);font-weight:500;display:block;margin-bottom:4px;}
+.field input,.field textarea{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--bg);}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:#fff;}
+.field textarea{resize:vertical;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.fields-title{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;}
+.status{border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;display:none;align-items:center;gap:8px;margin-bottom:.75rem;}
+.status.success{background:var(--success-bg);color:var(--success);}
+.status.error{background:var(--error-bg);color:var(--error);}
+.status.info{background:var(--info-bg);color:var(--info);}
+.status.warn{background:var(--warn-bg);color:var(--warn);}
+.status a{color:inherit;font-weight:500;}
+.pending-bar{background:var(--warn-bg);border:1px solid #f6d860;border-radius:var(--radius-sm);padding:10px 12px;font-size:13px;color:var(--warn);display:none;align-items:center;justify-content:space-between;margin-bottom:.75rem;gap:8px;}
+.pending-bar span{flex:1;}
+.sync-btn{background:var(--warn);color:#fff;border:none;border-radius:var(--radius-sm);padding:6px 12px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="logo">Hospav<span>IA</span></div>
+    <div class="subtitle">Registro de contactos en eventos de salud</div>
+  </div>
+
+  <div class="pending-bar" id="pendingBar">
+    <i class="ti ti-cloud-off"></i>
+    <span id="pendingText"></span>
+    <button class="sync-btn" onclick="syncPending()">Sincronizar</button>
+  </div>
+
+  <div class="card">
+    <label class="field-label"><i class="ti ti-calendar-event" style="font-size:13px;vertical-align:-1px;margin-right:3px"></i>Evento / Congreso</label>
+    <input type="text" id="evento" placeholder="Ej. Congreso Latinoamericano de Salud 2026">
+  </div>
+
+  <div id="captureSection">
+    <div style="background:#fff8e1;border:1px solid #f6d860;border-radius:8px;padding:8px 10px;font-size:12px;color:#b45309;text-align:center;margin-bottom:8px;"><i class="ti ti-rotate-clockwise" style="font-size:12px;vertical-align:-1px"></i> Fotografía la tarjeta en posición <strong>horizontal</strong> para mejor lectura</div>
+    <div class="capture-grid">
+      <!-- Tarjeta -->
+      <div class="capture-col">
+        <div class="preview-box" id="cardPreview">
+          <i class="ti ti-credit-card cap-icon"></i>
+          <span class="cap-label">Tarjeta</span>
+        </div>
+        <label class="file-btn" for="cardCamera"><i class="ti ti-camera" style="font-size:13px"></i> Tomar foto</label>
+        <input type="file" accept="image/*" capture="environment" id="cardCamera">
+        <label class="file-btn" for="cardGallery"><i class="ti ti-photo" style="font-size:13px"></i> Galería</label>
+        <input type="file" accept="image/*" id="cardGallery">
+      </div>
+      <!-- Persona -->
+      <div class="capture-col">
+        <div class="preview-box" id="personPreview">
+          <i class="ti ti-user cap-icon"></i>
+          <span class="cap-label">Persona</span>
+        </div>
+        <label class="file-btn" for="personCamera"><i class="ti ti-camera" style="font-size:13px"></i> Tomar foto</label>
+        <input type="file" accept="image/*" capture="user" id="personCamera">
+        <label class="file-btn" for="personGallery"><i class="ti ti-photo" style="font-size:13px"></i> Galería</label>
+        <input type="file" accept="image/*" id="personGallery">
+      </div>
+    </div>
+    <button class="btn btn-primary" id="btnAnalyze" disabled>
+      <i class="ti ti-sparkles"></i> Extraer información con IA
+    </button>
+  </div>
+
+  <div class="loading" id="loadingSection">
+    <div class="spinner"></div>
+    <p id="loadingText">Analizando tarjeta...</p>
+  </div>
+
+  <div id="statusBar" class="status"></div>
+
+  <div class="card fields-card" id="fieldsCard">
+    <div class="fields-title"><i class="ti ti-edit" style="font-size:13px;vertical-align:-1px;margin-right:4px"></i>Verifica y completa</div>
+    <div class="field"><label>Nombre completo</label><input type="text" id="f_nombre" placeholder="Dr. Nombre Apellido"></div>
+    <div class="two-col">
+      <div class="field"><label>Cargo</label><input type="text" id="f_cargo" placeholder="Especialista"></div>
+      <div class="field"><label>Especialidad</label><input type="text" id="f_especialidad" placeholder="Cardiología"></div>
+    </div>
+    <div class="field"><label>Institución / Empresa</label><input type="text" id="f_institucion" placeholder="Hospital o clínica"></div>
+    <div class="two-col">
+      <div class="field"><label>Teléfono</label><input type="tel" id="f_telefono" placeholder="+52 33..."></div>
+      <div class="field"><label>Celular</label><input type="tel" id="f_celular" placeholder="+52 33..."></div>
+    </div>
+    <div class="field"><label>Email</label><input type="email" id="f_email" placeholder="correo@hospital.com"></div>
+    <div class="field"><label>Sitio web</label><input type="text" id="f_web" placeholder="www.hospital.com"></div>
+    <div class="field"><label>Dirección</label><textarea id="f_direccion" rows="2" placeholder="Dirección completa"></textarea></div>
+    <div class="field"><label>LinkedIn / Redes</label><input type="text" id="f_redes" placeholder="linkedin.com/in/..."></div>
+    <div class="field"><label>Notas</label><textarea id="f_notas" rows="2" placeholder="Contexto, temas de interés..."></textarea></div>
+    <button class="btn btn-accent" id="btnSave"><i class="ti ti-cloud-upload"></i> Guardar contacto</button>
+    <button class="btn btn-warn" id="btnSaveLocal"><i class="ti ti-device-floppy"></i> Guardar sin conexión</button>
+    <button class="btn btn-ghost" id="btnReset"><i class="ti ti-refresh"></i> Escanear otra tarjeta</button>
+  </div>
+
+</div>
+<script>
+var cardB64 = null, personB64 = null;
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwf0ZZn7i_7Kh7kn1D2OLI9ZNylE9CEj0ct4Ho3T7Y9XksjFPpKcp3rsLjl9QWXMgqE/exec';
+var PROXY_URL = 'https://medicon-proxy.onrender.com/analyze';
+
+function compressImage(file, maxPx, quality) {
+  return new Promise(function(res, rej) {
+    var r = new FileReader();
+    r.onerror = rej;
+    r.onload = function(ev) {
+      var img = new Image();
+      img.onerror = rej;
+      img.onload = function() {
+        var w = img.width, h = img.height;
+        if (w > maxPx || h > maxPx) {
+          if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else { w = Math.round(w * maxPx / h); h = maxPx; }
+        }
+        var c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        res(c.toDataURL('image/jpeg', quality).split(',')[1]);
+      };
+      img.src = ev.target.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+
+function setPreview(zoneId, file) {
+  var zone = document.getElementById(zoneId);
+  zone.classList.add('done');
+  var url = URL.createObjectURL(file);
+  zone.innerHTML = '<img src="' + url + '" alt="preview">';
+}
+
+function checkReady() {
+  document.getElementById('btnAnalyze').disabled = !cardB64;
+}
+
+function handleCardFile(e) {
+  var f = e.target.files[0]; if (!f) return;
+  setPreview('cardPreview', f);
+  compressImage(f, 1200, 0.85).then(function(b64) {
+    cardB64 = b64;
+    checkReady();
+  }).catch(function() { cardB64 = null; checkReady(); });
+}
+
+function handlePersonFile(e) {
+  var f = e.target.files[0]; if (!f) return;
+  setPreview('personPreview', f);
+  compressImage(f, 400, 0.65).then(function(b64) {
+    personB64 = b64;
+    checkReady();
+  }).catch(function() { personB64 = null; checkReady(); });
+}
+
+// Attach listeners
+document.getElementById('cardCamera').addEventListener('change', handleCardFile);
+document.getElementById('cardGallery').addEventListener('change', handleCardFile);
+document.getElementById('personCamera').addEventListener('change', handlePersonFile);
+document.getElementById('personGallery').addEventListener('change', handlePersonFile);
+
+function showLoading(txt) {
+  document.getElementById('captureSection').style.display = 'none';
+  document.getElementById('fieldsCard').style.display = 'none';
+  document.getElementById('loadingSection').style.display = 'block';
+  document.getElementById('loadingText').textContent = txt;
+}
+
+function hideLoading() {
+  document.getElementById('loadingSection').style.display = 'none';
+}
+
+function showStatus(msg, type) {
+  var s = document.getElementById('statusBar');
+  var icons = {success:'circle-check', error:'alert-circle', info:'info-circle', warn:'alert-triangle'};
+  s.className = 'status ' + type;
+  s.innerHTML = '<i class="ti ti-' + (icons[type]||'info-circle') + '"></i><span>' + msg + '</span>';
+  s.style.display = 'flex';
+}
+
+function fillFields(d) {
+  var m = {nombre:'f_nombre', cargo:'f_cargo', especialidad:'f_especialidad',
+    institucion:'f_institucion', telefono:'f_telefono', celular:'f_celular',
+    email:'f_email', web:'f_web', direccion:'f_direccion', redes:'f_redes'};
+  Object.keys(m).forEach(function(k) {
+    var el = document.getElementById(m[k]);
+    if (el && d[k]) el.value = d[k];
+  });
+}
+
+function getFormData() {
+  return {
+    action: 'save',
+    evento: document.getElementById('evento').value,
+    nombre: document.getElementById('f_nombre').value,
+    cargo: document.getElementById('f_cargo').value,
+    especialidad: document.getElementById('f_especialidad').value,
+    institucion: document.getElementById('f_institucion').value,
+    telefono: document.getElementById('f_telefono').value,
+    celular: document.getElementById('f_celular').value,
+    email: document.getElementById('f_email').value,
+    web: document.getElementById('f_web').value,
+    direccion: document.getElementById('f_direccion').value,
+    redes: document.getElementById('f_redes').value,
+    notas: document.getElementById('f_notas').value,
+    fotoPersonaBase64: personB64, fotoPersonaMime: 'image/jpeg',
+    tarjetaBase64: cardB64, tarjetaMime: 'image/jpeg'
+  };
+}
+
+document.getElementById('btnAnalyze').onclick = function() {
+  if (!document.getElementById('evento').value.trim()) {
+    showStatus('Indica el nombre del evento antes de continuar.', 'error');
+    document.getElementById('statusBar').style.display = 'flex';
+    return;
+  }
+  showLoading('Analizando tarjeta con IA...');
+  fetch(PROXY_URL, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({imageBase64: cardB64, imageMime: 'image/jpeg'})
+  }).then(function(r) { return r.json(); })
+  .then(function(result) {
+    hideLoading();
+    if (result.error) throw new Error(result.error);
+    fillFields(result.data || {});
+    document.getElementById('fieldsCard').style.display = 'block';
+    showStatus('Información extraída. Revisa y corrige antes de guardar.', 'info');
+  }).catch(function(err) {
+    hideLoading();
+    document.getElementById('captureSection').style.display = 'block';
+    showStatus('Error: ' + err.message, 'error');
+  });
+};
+
+document.getElementById('btnSave').onclick = function() {
+  var btn = document.getElementById('btnSave');
+  btn.disabled = true;
+  showLoading('Guardando en Google Sheets y Drive...');
+  fetch(GAS_URL, {method: 'POST', body: JSON.stringify(getFormData())})
+  .then(function(r) { return r.json(); })
+  .then(function(result) {
+    hideLoading(); btn.disabled = false;
+    document.getElementById('fieldsCard').style.display = 'block';
+    if (result.success) {
+      showStatus('Contacto guardado. ' + (result.sheetUrl ? '<a href="' + result.sheetUrl + '" target="_blank">Ver en Sheets →</a>' : ''), 'success');
+    } else {
+      showStatus('Error: ' + (result.error || 'desconocido'), 'error');
+    }
+  }).catch(function(err) {
+    hideLoading(); btn.disabled = false;
+    document.getElementById('fieldsCard').style.display = 'block';
+    showStatus('Sin conexión. Usa "Guardar sin conexión".', 'warn');
+  });
+};
+
+document.getElementById('btnSaveLocal').onclick = function() {
+  var data = getFormData();
+  data.savedAt = new Date().toLocaleString('es-MX');
+  data.synced = false;
+  var p = JSON.parse(localStorage.getItem('hospavia_pending') || '[]');
+  p.push(data);
+  localStorage.setItem('hospavia_pending', JSON.stringify(p));
+  showStatus('Guardado localmente (' + p.length + ' pendiente' + (p.length > 1 ? 's' : '') + '). Sincroniza cuando tengas WiFi.', 'warn');
+  updatePendingBar();
+  setTimeout(resetApp, 1500);
+};
+
+document.getElementById('btnReset').onclick = resetApp;
+
+function syncPending() {
+  var p = JSON.parse(localStorage.getItem('hospavia_pending') || '[]');
+  if (!p.length) return;
+  showLoading('Sincronizando ' + p.length + ' contacto(s)...');
+  var done = 0, total = p.length;
+  function next(i) {
+    if (i >= total) {
+      hideLoading();
+      localStorage.removeItem('hospavia_pending');
+      showStatus('✓ ' + done + ' contacto(s) sincronizado(s).', 'success');
+      updatePendingBar(); return;
+    }
+    fetch(GAS_URL, {method: 'POST', body: JSON.stringify(p[i])})
+    .then(function(r) { return r.json(); })
+    .then(function(r) { if (r.success) done++; next(i+1); })
+    .catch(function() { next(i+1); });
+  }
+  next(0);
+}
+
+function updatePendingBar() {
+  var p = JSON.parse(localStorage.getItem('hospavia_pending') || '[]');
+  var bar = document.getElementById('pendingBar');
+  if (p.length > 0) {
+    document.getElementById('pendingText').textContent = p.length + ' contacto(s) sin sincronizar';
+    bar.style.display = 'flex';
+  } else { bar.style.display = 'none'; }
+}
+
+function resetApp() {
+  cardB64 = null; personB64 = null;
+  document.getElementById('captureSection').style.display = 'block';
+  document.getElementById('fieldsCard').style.display = 'none';
+  document.getElementById('statusBar').style.display = 'none';
+  var cp = document.getElementById('cardPreview');
+  cp.classList.remove('done');
+  cp.innerHTML = '<i class="ti ti-credit-card cap-icon"></i><span class="cap-label">Tarjeta</span>';
+  var pp = document.getElementById('personPreview');
+  pp.classList.remove('done');
+  pp.innerHTML = '<i class="ti ti-user cap-icon"></i><span class="cap-label">Persona</span>';
+  document.getElementById('btnAnalyze').disabled = true;
+  document.getElementById('cardCamera').value = '';
+  document.getElementById('cardGallery').value = '';
+  document.getElementById('personCamera').value = '';
+  document.getElementById('personGallery').value = '';
+  ['f_nombre','f_cargo','f_especialidad','f_institucion','f_telefono','f_celular',
+   'f_email','f_web','f_direccion','f_redes','f_notas'].forEach(function(id) {
+    document.getElementById(id).value = '';
+  });
+}
+
+updatePendingBar();
+</script>
+</body>
+</html>
